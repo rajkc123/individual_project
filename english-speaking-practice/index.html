@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Speaking Evaluation - Final Year Project</title>
+    <!-- Bootstrap CSS (using CDN for simplicity) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+
+        #recordStatus {
+            font-weight: bold;
+            color: red;
+            margin-left: 10px;
+        }
+
+        #loadingIndicator {
+            display: none;
+        }
+
+        #results {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mb-4">Speaking Evaluation</h1>
+
+        <!-- Display the question prompt -->
+        <div class="mb-3">
+            <p class="lead">
+                <strong>Question:</strong> Speak about the overall experience you have faced while completing your final
+                year project. What are the difficulties you have faced and how have you dealt with it?
+            </p>
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="mb-3">
+            <button id="recordButton" class="btn btn-primary">Start Recording</button>
+            <span id="recordStatus"></span>
+        </div>
+
+        <!-- Audio Playback (hidden until recording is done) -->
+        <div class="mb-3">
+            <audio id="audioPlayback" controls style="display: none;"></audio>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mb-3">
+            <button id="submitButton" class="btn btn-success" disabled>Submit for Evaluation</button>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="mb-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <span>Processing audio, please wait...</span>
+        </div>
+
+        <!-- Results Display -->
+        <div id="results" class="card">
+            <div class="card-body">
+                <h2 class="card-title">Evaluation Results</h2>
+                <p><strong>Transcribed Text:</strong> <span id="transcribedText"></span></p>
+                <p><strong>Pronunciation Score:</strong> <span id="pronunciationScore"></span></p>
+                <p><strong>Fluency Score:</strong> <span id="fluencyScore"></span></p>
+                <p><strong>Coherence Score:</strong> <span id="coherenceScore"></span></p>
+                <p><strong>Grammar Score:</strong> <span id="grammarScore"></span></p>
+                <p><strong>Content Score:</strong> <span id="contentScore"></span></p>
+                <p><strong>Overall Score:</strong> <span id="overallScore"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript: Recording, Submission, and UI Handling -->
+    <script>
+        // Variables to store the MediaRecorder and audio chunks
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Get references to UI elements
+        const recordButton = document.getElementById("recordButton");
+        const recordStatus = document.getElementById("recordStatus");
+        const audioPlayback = document.getElementById("audioPlayback");
+        const submitButton = document.getElementById("submitButton");
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        const resultsDiv = document.getElementById("results");
+
+        // Check for MediaRecorder API support
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert("MediaRecorder API is not supported in your browser.");
+        }
+
+        // Record button event listener
+        recordButton.addEventListener("click", async () => {
+            if (recordButton.textContent === "Start Recording") {
+                try {
+                    // Request access to the microphone
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    recordStatus.textContent = "Recording...";
+                    recordButton.textContent = "Stop Recording";
+                    audioChunks = [];
+
+                    // Collect data chunks
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    });
+
+                    // When recording stops, enable playback and submission
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayback.src = audioUrl;
+                        audioPlayback.style.display = "block";
+                        submitButton.disabled = false;
+                    });
+                } catch (error) {
+                    console.error("Error accessing microphone:", error);
+                    alert("Could not access your microphone. Please check your permissions.");
+                }
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                recordStatus.textContent = "";
+                recordButton.textContent = "Start Recording";
+            }
+        });
+
+        // Submit button event listener: send recorded audio to backend
+        submitButton.addEventListener("click", () => {
+            submitButton.disabled = true;
+            loadingIndicator.style.display = "block";
+
+            const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            const formData = new FormData();
+            formData.append("audio", audioBlob, "recording.webm");
+
+            fetch("http://localhost:5000/upload", {
+                method: "POST",
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    loadingIndicator.style.display = "none";
+                    resultsDiv.style.display = "block";
+
+                    document.getElementById("transcribedText").textContent = data.transcribed_text;
+                    document.getElementById("pronunciationScore").textContent = data.scores.pronunciation;
+                    document.getElementById("fluencyScore").textContent = data.scores.fluency;
+                    document.getElementById("coherenceScore").textContent = data.scores.coherence;
+                    document.getElementById("grammarScore").textContent = data.scores.grammar;
+                    document.getElementById("contentScore").textContent = data.scores.content;
+                    document.getElementById("overallScore").textContent = data.scores.overall;
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    loadingIndicator.style.display = "none";
+                    alert("There was an error processing your audio.");
+                });
+        });
+    </script>
+</body>
+
+</html>
