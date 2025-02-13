@@ -1,0 +1,152 @@
+/* Practice.css */
+
+/* Overall container styling */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Headings */
+h1,
+h2,
+h3 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Question card */
+.question {
+    padding: 20px;
+    background-color: #f3f3f3;
+    border-left: 6px solid #007bff;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+/* Button styling */
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Recording status text */
+.recording-status {
+    font-weight: bold;
+    color: #d32f2f;
+    margin-left: 10px;
+    font-size: 16px;
+}
+
+/* Timer styling */
+.timer {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Audio playback styling */
+audio {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 4px;
+}
+
+/* Submit container for centering the button */
+.submit-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Loading indicator styling */
+.loading-indicator {
+    text-align: center;
+    font-size: 18px;
+    color: #007bff;
+    margin-top: 20px;
+}
+
+/* Results display card */
+.results-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    margin-top: 30px;
+}
+
+.results-card p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+/* Score Bar Styles */
+.score-bar-container {
+    margin-bottom: 15px;
+}
+
+.score-label {
+    font-size: 16px;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.score-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    width: 0;
+    /* Initial width; will animate to the correct width */
+    background-color: #28a745;
+    /* Default green (will be overridden inline if needed) */
+    transition: width 1s ease-in-out;
+}
+
+/* Try Again button styling */
+.try-again-button {
+    background-color: #dc3545;
+    transition: background-color 0.3s ease;
+}
+
+.try-again-button:hover {
+    background-color: #a71d2a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+}
